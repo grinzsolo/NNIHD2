@@ -4,3 +4,6 @@ pandas
 numpy
 joblib
 streamlit-extras
+streamlit_gsheets
+gspread
+oauth2client
