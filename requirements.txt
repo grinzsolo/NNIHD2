@@ -5,4 +5,4 @@ numpy
 joblib
 streamlit-extras
 gspread
-oauth2clien
+gspread_pandas
