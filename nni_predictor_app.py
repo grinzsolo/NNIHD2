@@ -37,10 +37,10 @@ with st.form("predict_form"):
     col1, col2 = st.columns(2)
     with col1:
         input_date = st.date_input("📅 Date", value=datetime.today())
-        polymer_grade = st.text_input("🏷️ Polymer Grade")
+        polymer_grade = st.text_input("🏷️ Polymer Grade", placeholder="เช่น HD7000F")
     with col2:
         input_time = st.time_input("⏰ Time", value=time(hour=0, minute=0))
-        user_name = st.text_input("👤 User")
+        user_name = st.text_input("👤 User", placeholder="เช่น Parom W.")
 
     a = st.number_input("🧪 A (LC)", step=1, format="%d")
     b = st.number_input("🧪 B (MFR_S205)", step=0.1)
