@@ -4,5 +4,4 @@ pandas
 numpy
 joblib
 streamlit-extras
-gspread
-gspread_pandas
+streamlit-gsheets
