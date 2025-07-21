@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 import joblib
 from datetime import datetime, time
-from streamlit_gsheets import GSheetsConnection
 
 # โหลด model และ scaler
 model = joblib.load("best_model.pkl")
@@ -13,16 +12,9 @@ model_name = type(model).__name__
 st.set_page_config(page_title="🧪 NNI Predictor App", layout="centered")
 st.markdown("""
     <style>
-        .main {
-            background-color: #f9f9f9;
-            font-family: 'Segoe UI', sans-serif;
-        }
-        .stTextInput>div>div>input {
-            background-color: #fffbe6;
-        }
-        .stNumberInput>div>div>input {
-            background-color: #fffbe6;
-        }
+        .main { background-color: #f9f9f9; font-family: 'Segoe UI', sans-serif; }
+        .stTextInput>div>div>input { background-color: #fffbe6; }
+        .stNumberInput>div>div>input { background-color: #fffbe6; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -47,10 +39,6 @@ a = st.number_input("Input A (LC)", step=1, format="%d")
 b = st.number_input("Input B (MFR_S205)", step=0.1, format="%.2f")
 c = st.number_input("Input C (MFR_S206)", step=0.1, format="%.2f")
 d = st.number_input("Input D (MFR_S402C)", step=0.1, format="%.2f")
-
-# เชื่อมต่อ Google Sheets
-conn = st.connection("gsheets", type=GSheetsConnection)
-sheet_df = conn.read(worksheet="Sheet1", usecols=list(range(10)))
 
 # --------- Section 3: Predict and Save ---------
 if st.button("Predict and Save"):
@@ -80,8 +68,12 @@ if st.button("Predict and Save"):
             "Predicted_NNI":  prediction
         }
 
-        # 4. Append to Google Sheet
-        updated_df = pd.concat([sheet_df, pd.DataFrame([record])], ignore_index=True)
+        # 4. Save to Google Sheets via st.connection
+        conn = st.connection("gsheets", type="gspread")
+        existing_df = conn.read(worksheet="Sheet1", usecols=list(record.keys()), ttl=0)
+        updated_df = pd.concat([existing_df, pd.DataFrame([record])], ignore_index=True)
+
+        # เขียนกลับไปยัง Sheet
         conn.update(worksheet="Sheet1", data=updated_df)
 
         # 5. Notify user
