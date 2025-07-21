@@ -10,6 +10,7 @@ import pytz  # ✅ เพิ่ม pytz สำหรับ timezone
 # โหลดโมเดลและ scaler
 model = joblib.load("best_model.pkl")
 scaler = joblib.load("scaler.pkl")
+model_name = type(model).__name__
 
 # โหลด secrets
 gh_user = st.secrets["github"]["username"]
@@ -30,7 +31,8 @@ else:
         "Predicted_NNI", "Log_Timestamp"  # ✅ เพิ่ม column
     ])
 
-st.title("🔬 NNI Predictor (GitHub Logger)")
+st.title("🔬 NNI HDPE2 Prediction (Model V1)")
+st.markdown(f"**Model Type:** `{model_name}`")
 
 # -------- ฟอร์มอินพุต --------
 with st.form("predict_form"):
