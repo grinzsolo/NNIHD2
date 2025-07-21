@@ -4,4 +4,3 @@ pandas
 numpy
 joblib
 streamlit-extras
-streamlit-gsheets
