@@ -31,7 +31,7 @@ else:
         "Predicted_NNI", "Log_Timestamp"  # ✅ เพิ่ม column
     ])
 
-st.title("🔬 NNI HDPE2 Prediction (Model V1)")
+st.title("🔬 NNI HDPE2 Prediction 1.0")
 st.markdown(f"**Model Type:** `{model_name}`")
 
 # -------- ฟอร์มอินพุต --------
