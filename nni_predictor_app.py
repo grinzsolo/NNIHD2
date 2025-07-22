@@ -66,8 +66,8 @@ with st.form("predict_form"):
             log_ts = thai_time.strftime("%Y-%m-%d %H:%M:%S")
 
             new_row = {
-                "Date": input_date.strftime("%Y-%m-%d"),
-                "Time": input_time.strftime("%H:%M:%S"),
+                "Sample Date": input_date.strftime("%Y-%m-%d"),
+                "Sample Time": input_time.strftime("%H:%M:%S"),
                 "User_Name": user_name,
                 "Polymer_Grade": polymer_grade,
                 "A_LC": a,
