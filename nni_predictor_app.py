@@ -45,9 +45,9 @@ with st.form("predict_form"):
         user_name = st.text_input("👤 User", placeholder="เช่น Parom W.")
 
     a = st.number_input("🧪 A (LC)", step=1, format="%d")
-    b = st.number_input("🧪 B (MFR_S205)", step=0.1)
-    c = st.number_input("🧪 C (MFR_S206)", step=0.1)
-    d = st.number_input("🧪 D (MFR_S402C)", step=0.1)
+    b = st.number_input("🧪 B (MFR_S205)", step=0.001, format="%.3f")
+    c = st.number_input("🧪 C (MFR_S206)", step=0.001, format="%.3f")
+    d = st.number_input("🧪 D (MFR_S402C)", step=0.001, format="%.3f")
 
     submitted = st.form_submit_button("✅ Predict & Save")
 
