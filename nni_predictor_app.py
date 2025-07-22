@@ -38,10 +38,10 @@ st.markdown(f"**Model Type:** `{model_name}`")
 with st.form("predict_form"):
     col1, col2 = st.columns(2)
     with col1:
-        input_date = st.date_input("📅 Date", value=datetime.today())
+        input_date = st.date_input("📅 Sample Date", value=datetime.today())
         polymer_grade = st.text_input("🏷️ Polymer Grade", placeholder="เช่น HD7000F")
     with col2:
-        input_time = st.time_input("⏰ Time", value=time(hour=0, minute=0))
+        input_time = st.time_input("⏰ Sample Time", value=time(hour=0, minute=0))
         user_name = st.text_input("👤 User", placeholder="เช่น Parom W.")
 
     a = st.number_input("🧪 A (LC)", step=1, format="%d")
@@ -66,8 +66,8 @@ with st.form("predict_form"):
             log_ts = thai_time.strftime("%Y-%m-%d %H:%M:%S")
 
             new_row = {
-                "Sample Date": input_date.strftime("%Y-%m-%d"),
-                "Sample Time": input_time.strftime("%H:%M:%S"),
+                "Date": input_date.strftime("%Y-%m-%d"),
+                "Time": input_time.strftime("%H:%M:%S"),
                 "User_Name": user_name,
                 "Polymer_Grade": polymer_grade,
                 "A_LC": a,
