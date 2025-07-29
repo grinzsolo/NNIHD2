@@ -110,6 +110,8 @@ with st.form("predict_form"):
 🔮 Predicted NNI: {pred:.2f}
 """
                 send_line_notify(line_msg)
+except Exception as e:
+    st.warning("⚠️ ไม่สามารถส่ง LINE Notify ได้: " + str(e))
 
             except subprocess.CalledProcessError as e:
                 st.error("❌ Git error: " + str(e))
