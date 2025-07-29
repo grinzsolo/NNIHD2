@@ -5,8 +5,8 @@ import joblib
 import subprocess
 from datetime import datetime, time
 import os
-import pytz  # ✅ เพิ่ม pytz สำหรับ timezone
-import requests
+import pytz
+import requests  # ✅ สำหรับ LINE Notify
 
 # โหลดโมเดลและ scaler
 model = joblib.load("best_model.pkl")
@@ -19,6 +19,14 @@ gh_repo = st.secrets["github"]["repo"]
 gh_token = st.secrets["github"]["token"]
 repo_url = f"https://{gh_token}@github.com/{gh_user}/{gh_repo}.git"
 
+# LINE Notify token
+def send_line_notify(message):
+    token = st.secrets["line"]["notify_token"]
+    url = "https://notify-api.line.me/api/notify"
+    headers = {"Authorization": f"Bearer {token}"}
+    payload = {"message": message}
+    requests.post(url, headers=headers, data=payload)
+
 # ชื่อไฟล์ CSV log
 log_file = "prediction_log.csv"
 
@@ -29,16 +37,8 @@ else:
     existing = pd.DataFrame(columns=[
         "Date", "Time", "User_Name", "Polymer_Grade",
         "A_LC", "B_MFR_S205", "C_MFR_S206", "D_MFR_S402C",
-        "Predicted_NNI", "Log_Timestamp"  # ✅ เพิ่ม column
+        "Predicted_NNI", "Log_Timestamp"
     ])
-
-
-def send_line_notify(message):
-    token = st.secrets["line"]["notify_token"]
-    url = "https://notify-api.line.me/api/notify"
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {"message": message}
-    requests.post(url, headers=headers, data=payload)
 
 st.title("🔬 NNI HDPE2 Prediction 1.0")
 st.markdown(f"**Model Type:** `{model_name}`")
@@ -84,7 +84,7 @@ with st.form("predict_form"):
                 "C_MFR_S206": c,
                 "D_MFR_S402C": d,
                 "Predicted_NNI": pred,
-                "Log_Timestamp": log_ts  # ✅ เพิ่ม timestamp column
+                "Log_Timestamp": log_ts
             }
 
             updated_df = pd.concat([existing, pd.DataFrame([new_row])], ignore_index=True)
@@ -99,8 +99,9 @@ with st.form("predict_form"):
                 subprocess.run(["git", "push", repo_url], check=True)
 
                 st.success("📤 Log uploaded to GitHub!")
+
                 # ✅ ส่ง LINE แจ้งเตือน
-line_msg = f"""
+                line_msg = f"""
 🔔 New NNI Prediction
 👤 User: {user_name}
 📅 Date: {input_date.strftime('%Y-%m-%d')} {input_time.strftime('%H:%M')}
@@ -108,7 +109,7 @@ line_msg = f"""
 🧪 Inputs: LC={a}, S205={b}, S206={c}, S402C={d}
 🔮 Predicted NNI: {pred:.2f}
 """
-send_line_notify(line_msg)
+                send_line_notify(line_msg)
 
             except subprocess.CalledProcessError as e:
                 st.error("❌ Git error: " + str(e))
