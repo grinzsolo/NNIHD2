@@ -6,6 +6,7 @@ import subprocess
 from datetime import datetime, time
 import os
 import pytz  # ✅ เพิ่ม pytz สำหรับ timezone
+import requests
 
 # โหลดโมเดลและ scaler
 model = joblib.load("best_model.pkl")
@@ -94,3 +95,29 @@ with st.form("predict_form"):
                 st.error("❌ Git error: " + str(e))
 
             st.dataframe(updated_df.tail(5))
+
+
+# ✅ ส่ง LINE Notify
+line_token = st.secrets["line_notify"]["token"]
+line_message = f"""
+🔔 [NNI Prediction HDPE2]
+👤 User: {user_name}
+🏷️ Grade: {polymer_grade}
+📈 NNI: {pred:.2f}
+⏰ Time: {log_ts}
+"""
+
+headers = {
+    "Authorization": f"Bearer {line_token}",
+    "Content-Type": "application/x-www-form-urlencoded"
+}
+payload = {'message': line_message}
+
+try:
+    r = requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload)
+    if r.status_code == 200:
+        st.success("📲 แจ้งเตือน LINE สำเร็จ")
+    else:
+        st.warning("⚠️ แจ้งเตือน LINE ไม่สำเร็จ")
+except Exception as e:
+    st.error(f"❌ Error ในการส่ง LINE Notify: {e}")
