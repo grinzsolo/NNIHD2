@@ -5,8 +5,7 @@ import joblib
 import subprocess
 from datetime import datetime, time
 import os
-import pytz
-import requests
+import pytz  # ✅ เพิ่ม pytz สำหรับ timezone
 
 # โหลดโมเดลและ scaler
 model = joblib.load("best_model.pkl")
@@ -18,7 +17,6 @@ gh_user = st.secrets["github"]["username"]
 gh_repo = st.secrets["github"]["repo"]
 gh_token = st.secrets["github"]["token"]
 repo_url = f"https://{gh_token}@github.com/{gh_user}/{gh_repo}.git"
-line_token = st.secrets["line_notify"]["token"]  # ✅ เตรียมไว้ใช้
 
 # ชื่อไฟล์ CSV log
 log_file = "prediction_log.csv"
@@ -30,7 +28,7 @@ else:
     existing = pd.DataFrame(columns=[
         "Date", "Time", "User_Name", "Polymer_Grade",
         "A_LC", "B_MFR_S205", "C_MFR_S206", "D_MFR_S402C",
-        "Predicted_NNI", "Log_Timestamp"
+        "Predicted_NNI", "Log_Timestamp"  # ✅ เพิ่ม column
     ])
 
 st.title("🔬 NNI HDPE2 Prediction 1.0")
@@ -60,9 +58,10 @@ with st.form("predict_form"):
             X = np.array([[a, b, c, d]])
             X_scaled = scaler.transform(X)
             pred = float(model.predict(X_scaled)[0])
+
             st.success(f"🔮 Predicted NNI = `{pred:.2f}`")
 
-            # ✅ Timestamp ไทย
+            # ✅ สร้าง timestamp เวลาไทย
             thai_time = datetime.now(pytz.timezone("Asia/Bangkok"))
             log_ts = thai_time.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -76,7 +75,7 @@ with st.form("predict_form"):
                 "C_MFR_S206": c,
                 "D_MFR_S402C": d,
                 "Predicted_NNI": pred,
-                "Log_Timestamp": log_ts
+                "Log_Timestamp": log_ts  # ✅ เพิ่ม timestamp column
             }
 
             updated_df = pd.concat([existing, pd.DataFrame([new_row])], ignore_index=True)
@@ -89,32 +88,9 @@ with st.form("predict_form"):
                 subprocess.run(["git", "add", log_file], check=True)
                 subprocess.run(["git", "commit", "-m", "📈 New prediction entry added"], check=True)
                 subprocess.run(["git", "push", repo_url], check=True)
+
                 st.success("📤 Log uploaded to GitHub!")
             except subprocess.CalledProcessError as e:
                 st.error("❌ Git error: " + str(e))
 
-            # ✅ LINE Notify
-            line_message = f"""
-🔔 [NNI Prediction HDPE2]
-👤 User: {user_name}
-🏷️ Grade: {polymer_grade}
-📈 NNI: {pred:.2f}
-⏰ Time: {log_ts}
-"""
-            headers = {
-                "Authorization": f"Bearer {line_token}",
-                "Content-Type": "application/x-www-form-urlencoded"
-            }
-            payload = {'message': line_message}
-
-            try:
-                r = requests.post("https://notify-api.line.me/api/notify", headers=headers, data=payload)
-                if r.status_code == 200:
-                    st.success("📲 แจ้งเตือน LINE สำเร็จ")
-                else:
-                    st.warning("⚠️ แจ้งเตือน LINE ไม่สำเร็จ")
-            except Exception as e:
-                st.error(f"❌ Error ในการส่ง LINE Notify: {e}")
-
-            # แสดงตารางล่าสุด
             st.dataframe(updated_df.tail(5))
