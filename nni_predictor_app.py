@@ -6,26 +6,37 @@ import subprocess
 from datetime import datetime, time
 import os
 import pytz
-import requests  # ✅ สำหรับ LINE Notify
+import requests  # ✅ สำหรับส่งผ่าน LINE Messaging API
+
+# ✅ ฟังก์ชันส่งข้อความผ่าน LINE Messaging API
+def send_line_message(user_id: str, message: str):
+    access_token = st.secrets["line_messaging"]["access_token"]
+    url = "https://api.line.me/v2/bot/message/push"
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+    body = {
+        "to": user_id,
+        "messages": [{
+            "type": "text",
+            "text": message
+        }]
+    }
+    response = requests.post(url, headers=headers, json=body)
+    if response.status_code != 200:
+        st.warning(f"⚠️ LINE Messaging API error: {response.text}")
 
 # โหลดโมเดลและ scaler
 model = joblib.load("best_model.pkl")
 scaler = joblib.load("scaler.pkl")
 model_name = type(model).__name__
 
-# โหลด secrets
+# โหลด secrets สำหรับ GitHub
 gh_user = st.secrets["github"]["username"]
 gh_repo = st.secrets["github"]["repo"]
 gh_token = st.secrets["github"]["token"]
 repo_url = f"https://{gh_token}@github.com/{gh_user}/{gh_repo}.git"
-
-# LINE Notify token
-def send_line_notify(message):
-    token = st.secrets["line"]["notify_token"]
-    url = "https://notify-api.line.me/api/notify"
-    headers = {"Authorization": f"Bearer {token}"}
-    payload = {"message": message}
-    requests.post(url, headers=headers, data=payload)
 
 # ชื่อไฟล์ CSV log
 log_file = "prediction_log.csv"
@@ -100,7 +111,7 @@ with st.form("predict_form"):
 
                 st.success("📤 Log uploaded to GitHub!")
 
-                # ✅ ส่ง LINE แจ้งเตือน
+                # ✅ ส่ง LINE แจ้งเตือนผ่าน Messaging API
                 line_msg = f"""
 🔔 New NNI Prediction
 👤 User: {user_name}
@@ -109,9 +120,11 @@ with st.form("predict_form"):
 🧪 Inputs: LC={a}, S205={b}, S206={c}, S402C={d}
 🔮 Predicted NNI: {pred:.2f}
 """
-                send_line_notify(line_msg)
-except Exception as e:
-    st.warning("⚠️ ไม่สามารถส่ง LINE Notify ได้: " + str(e))
+                try:
+                    user_id = st.secrets["line_messaging"]["user_id"]
+                    send_line_message(user_id, line_msg)
+                except Exception as e:
+                    st.warning("⚠️ ไม่สามารถส่งข้อความผ่าน LINE Messaging API ได้: " + str(e))
 
             except subprocess.CalledProcessError as e:
                 st.error("❌ Git error: " + str(e))
