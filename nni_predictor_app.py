@@ -32,16 +32,11 @@ model = joblib.load("best_model.pkl")
 scaler = joblib.load("scaler.pkl")
 model_name = type(model).__name__
 
-# โหลด secrets สำหรับ GitHub
-gh_user = st.secrets.get("github", {}).get("username", None)
+# โหลด secrets
+gh_user = st.secrets["github"]["username"]
 gh_repo = st.secrets["github"]["repo"]
-gh_token = st.secrets.get("github", {}).get("token", None)
+gh_token = st.secrets["github"]["token"]
 repo_url = f"https://{gh_token}@github.com/{gh_user}/{gh_repo}.git"
-
-if not gh_user or not gh_token:
-    st.warning("⚠️ GitHub credentials not found in secrets. Some features may not work.")
-else:
-    st.success(f"✅ GitHub user loaded: {gh_user}")
 
 # ชื่อไฟล์ CSV log
 log_file = "prediction_log.csv"
@@ -135,4 +130,5 @@ with st.form("predict_form"):
                 st.error("❌ Git error: " + str(e))
 
             st.dataframe(updated_df.tail(5))
+
 
